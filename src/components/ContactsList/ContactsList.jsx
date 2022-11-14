@@ -1,13 +1,8 @@
-import React from 'react';
+// Hooks
+import { useContacts } from 'hooks/useContacts';
+import { useDeleteContactMutation } from 'redux/contactsSlice';
 
-import {
-  useGetContactsQuery,
-  useDeleteContactMutation,
-} from 'redux/contactsSlice';
-
-import { useSelector } from 'react-redux';
-import { selectFilter } from 'redux/selectors';
-
+// Components
 import Loader from 'components/Loader/Loader';
 import {
   ContactsListStyled,
@@ -15,22 +10,15 @@ import {
   ContactsButton,
 } from './ContactsList.styled';
 
-const getFilteredContacts = (contacts, filter) => {
-  if (filter === '') {
-    return contacts;
-  }
-  return contacts.filter(contact => {
-    const contactName = contact.name.toLowerCase();
-    return contactName.includes(filter.toLowerCase());
-  });
-};
-
 const ContactsList = () => {
-  let { data: contacts, isFetching, isError } = useGetContactsQuery();
+  const {
+    data: contacts,
+    isFetching,
+    isError,
+    isUninitialized,
+    error,
+  } = useContacts();
   const [deleteContact] = useDeleteContactMutation();
-  const filter = useSelector(selectFilter);
-
-  contacts = getFilteredContacts(contacts, filter);
 
   const onDeleteBtnClick = id => {
     deleteContact(id);
@@ -47,11 +35,15 @@ const ContactsList = () => {
     </ContactsItem>
   );
 
+  const onError = isError;
+  const onLoading = isFetching;
+  const onFullfilled = !isFetching && !isError && !isUninitialized;
+
   return (
     <ContactsListStyled>
-      {isError && <p>{isError}</p>}
-      {isFetching && <Loader />}
-      {!isFetching && !isError && contacts.map(mapCallback)}
+      {onError && <p>{error.error}</p>}
+      {onLoading && <Loader />}
+      {onFullfilled && contacts.map(mapCallback)}
     </ContactsListStyled>
   );
 };
