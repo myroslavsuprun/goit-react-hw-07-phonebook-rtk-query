@@ -1,55 +1,38 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { fetchContacts, deleteContact, addContact } from './operations';
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-const contactsInitialState = {
-  contacts: [],
-  isLoading: false,
-  error: null,
-};
+export const contactsApi = createApi({
+  reducerPath: 'contactsApi',
+  baseQuery: fetchBaseQuery({
+    baseUrl: 'https://636fbe12f2ed5cb047e442c1.mockapi.io',
+  }),
+  tagTypes: ['Contacts'],
+  endpoints: builder => ({
+    getContacts: builder.query({
+      query: () => `/contacts`,
+      providesTags: ['Contacts'],
+    }),
 
-const onPending = state => {
-  state.isLoading = true;
-};
+    deleteContact: builder.mutation({
+      query: id => ({
+        url: `/contacts/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Contacts'],
+    }),
 
-const onRejected = (state, action) => {
-  state.isLoading = false;
-  state.error = action.payload;
-};
-
-export const contactsSlice = createSlice({
-  name: 'contacts',
-  initialState: contactsInitialState,
-  extraReducers: builder => {
-    // Fetch contacts reducers
-    builder.addCase(fetchContacts.pending, onPending);
-    builder.addCase(fetchContacts.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.error = null;
-      state.contacts = action.payload;
-    });
-    builder.addCase(fetchContacts.rejected, onRejected);
-
-    // Delete contact reducers
-    builder.addCase(deleteContact.pending, onPending);
-    builder.addCase(deleteContact.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.error = null;
-      const index = state.contacts.findIndex(contact => {
-        return contact.id === action.payload.id;
-      });
-      state.contacts.splice(index, 1);
-    });
-    builder.addCase(deleteContact.rejected, onRejected);
-
-    // Add contact reducers
-    builder.addCase(addContact.pending, onPending);
-    builder.addCase(addContact.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.error = null;
-      state.contacts.push(action.payload);
-    });
-    builder.addCase(addContact.rejected, onRejected);
-  },
+    addContact: builder.mutation({
+      query: data => ({
+        url: '/contacts',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Contacts'],
+    }),
+  }),
 });
 
-export const contactsReducer = contactsSlice.reducer;
+export const {
+  useGetContactsQuery,
+  useDeleteContactMutation,
+  useAddContactMutation,
+} = contactsApi;
