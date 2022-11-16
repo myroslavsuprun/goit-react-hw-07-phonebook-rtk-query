@@ -13,12 +13,13 @@ import {
 const ContactsList = () => {
   const {
     data: contacts,
-    isFetching,
+    isLoading,
     isError,
     isUninitialized,
     error,
   } = useContacts();
-  const [deleteContact] = useDeleteContactMutation();
+  const [deleteContact, { isLoading: isDeleteContactLoading }] =
+    useDeleteContactMutation();
 
   const onDeleteBtnClick = id => {
     deleteContact(id);
@@ -29,15 +30,18 @@ const ContactsList = () => {
       {name}
       <br />
       {phone}
-      <ContactsButton onClick={() => onDeleteBtnClick(id)}>
-        Delete
+      <ContactsButton
+        disabled={isDeleteContactLoading}
+        onClick={() => onDeleteBtnClick(id)}
+      >
+        {isDeleteContactLoading ? 'Deleting' : 'Delete'}
       </ContactsButton>
     </ContactsItem>
   );
 
   const onError = isError;
-  const onLoading = isFetching;
-  const onFullfilled = !isFetching && !isError && !isUninitialized;
+  const onLoading = isLoading;
+  const onFullfilled = !isLoading && !isError && !isUninitialized;
 
   return (
     <ContactsListStyled>
