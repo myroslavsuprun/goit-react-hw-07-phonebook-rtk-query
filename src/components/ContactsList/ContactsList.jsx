@@ -1,14 +1,10 @@
 // Hooks
 import { useContacts } from 'hooks/useContacts';
-import { useDeleteContactMutation } from 'redux/contactsSlice';
 
 // Components
 import Loader from 'components/Loader/Loader';
-import {
-  ContactsListStyled,
-  ContactsItem,
-  ContactsButton,
-} from './ContactsList.styled';
+import Contact from 'components/Contact/Contact';
+import { ContactsListStyled } from './ContactsList.styled';
 
 const ContactsList = () => {
   const {
@@ -18,25 +14,9 @@ const ContactsList = () => {
     isUninitialized,
     error,
   } = useContacts();
-  const [deleteContact, { isLoading: isDeleteContactLoading }] =
-    useDeleteContactMutation();
-
-  const onDeleteBtnClick = id => {
-    deleteContact(id);
-  };
 
   const mapCallback = ({ name, phone, id }) => (
-    <ContactsItem key={id}>
-      {name}
-      <br />
-      {phone}
-      <ContactsButton
-        disabled={isDeleteContactLoading}
-        onClick={() => onDeleteBtnClick(id)}
-      >
-        {isDeleteContactLoading ? 'Deleting' : 'Delete'}
-      </ContactsButton>
-    </ContactsItem>
+    <Contact name={name} phone={phone} id={id} key={id} />
   );
 
   const onError = isError;
